@@ -5,4 +5,5 @@ urlpatterns = [
     path('', register, name='register'),
     path('chat', chat_message, name='chat'),
     path('login', login_user, name='login'),
+    path('deconnexion',deconnexion,name='deconnexion')
 ]
