@@ -37,3 +37,16 @@ def chat_message(request):
 
 def login(request):
     return render(request, 'login.html')
+
+
+def user_list(request):
+    users = Users.objects.all()
+    return render(request, 'chat.html', {'users': users})
+
+def chat_with_user(request, user_id):
+    if request.user.is_authenticated:
+        user = Users.objects.get(id=user_id)
+        messages = Messages.objects.filter(sender=request.user, destinate=user) | Messages.objects.filter(sender=user, destinate=request.user)
+        return render(request, 'chat.html', {'user': user, 'messages': messages})
+    else:
+        return redirect('login')
