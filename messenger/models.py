@@ -8,6 +8,7 @@ class Users(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     password = models.TextField()
     photo = models.ImageField(upload_to='media/photo',default='media/image_defaut/img_profils.png')
+    is_online = models.BooleanField(default=False)
   
         
 class Messages(models.Model):

@@ -31,17 +31,14 @@ def register(request):
 
 def chat_message(request):
      if request.user.is_authenticated:
-          return render(request, 'chat.html')
+          users = Users.objects.all()
+          return render(request, 'chat.html', {'users': users})
      else:
           return redirect('register')
 
-def login(request):
+def login_user(request):
     return render(request, 'login.html')
 
-
-def user_list(request):
-    users = Users.objects.all()
-    return render(request, 'chat.html', {'users': users})
 
 def chat_with_user(request, user_id):
     if request.user.is_authenticated:
