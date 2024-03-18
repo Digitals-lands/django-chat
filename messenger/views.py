@@ -29,9 +29,11 @@ def register(request):
      else:
           return render(request, 'home.html')
 
-
 def chat_message(request):
      if request.user.is_authenticated:
           return render(request, 'chat.html')
      else:
           return redirect('register')
+
+def login(request):
+    return render(request, 'login.html')
