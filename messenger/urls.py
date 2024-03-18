@@ -2,7 +2,7 @@ from django.urls import path
 from messenger import urls
 from .views import *
 urlpatterns = [
-    
-    path('', register),
-    path('login', login),
+    path('', register, name='register'),
+    path('chat', chat_message, name='chat'),
+    path('login', login_user, name='login'),
 ]
