@@ -11,7 +11,11 @@ class Users(AbstractUser):
     is_online = models.BooleanField(default=False)
   
     def get_status(self):
-        return "En ligne " if self.is_online else "Hors ligne"
+        return self.is_online
+
+    @property
+    def status_display(self):
+        return "En ligne" if self.is_online else "Hors ligne"
         
 class Messages(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

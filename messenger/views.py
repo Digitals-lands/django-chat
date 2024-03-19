@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from messenger.models import *
 from django.contrib.auth import login,logout
 from django.contrib import messages
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # Create your views here.
 
@@ -35,10 +37,10 @@ def register(request):
 
 def chat_message(request):
      if request.user.is_authenticated:
-          users = Users.objects.all()
+          users = Users.objects.exclude(id=request.user.id)
           return render(request, 'chat.html', {'users': users})
      else:
-          return redirect('register')
+          return redirect('login')
 
 def login_user(request):
      if request.user.id:
@@ -59,19 +61,8 @@ def login_user(request):
                     messages.error(request, "Mot de passe non valide")
           else:
                messages.error(request,"Username ou mot de passe non valide")      
-     
 
      return render(request, 'login.html')
-
-
-
-def chat_with_user(request, user_id):
-    if request.user.is_authenticated:
-        user = Users.objects.get(id=user_id)
-        messages = Messages.objects.filter(sender=request.user, destinate=user) | Messages.objects.filter(sender=user, destinate=request.user)
-        return render(request, 'chat.html', {'user': user, 'messages': messages})
-    else:
-        return redirect('login')
     
 def deconnexion(request):
      user = request.user
@@ -79,3 +70,28 @@ def deconnexion(request):
      user.save()     
      logout(request)  
      return redirect('login')
+
+
+def send_message(request):
+     if request.method == "POST":
+          message_text = request.POST.get('message')
+          receiver_username = request.POST.get('receiver_username')
+
+          receiver = Users.objects.get(username=receiver_username)
+          #print(message_text, receiver_username, receiver)
+          Messages.objects.create(
+               text=message_text,
+               sender=request.user,
+               destinate=receiver
+          )
+          
+          channel_layer = get_channel_layer()
+          async_to_sync(channel_layer.group_send)(
+               f"chat_{receiver.username}",
+               {
+                    'type': 'chat_message',
+                    'message': message_text,
+                    'sender': request.user.username
+               }
+          )
+     return redirect('chat')
