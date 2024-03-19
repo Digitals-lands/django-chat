@@ -21,7 +21,8 @@ def register(request):
         user = Users.objects.create_user(
                username=username,
                password=password,
-               photo=photo
+               photo=photo, 
+               is_online=True
           )
         if user is not None:
                login(request, user)
@@ -50,7 +51,9 @@ def login_user(request):
                
           if user is not None:    
                if user.check_password(password):
-                    login(request, user)            
+                    login(request, user)  
+                    user.is_online = True
+                    user.save()        
                     return redirect('chat')
                else:
                     messages.error(request, "Mot de passe non valide")
@@ -71,5 +74,8 @@ def chat_with_user(request, user_id):
         return redirect('login')
     
 def deconnexion(request):
-    logout(request)
-    return redirect('connexion')
+     user = request.user
+     user.is_online = False
+     user.save()     
+     logout(request)  
+     return redirect('login')

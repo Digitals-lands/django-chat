@@ -10,6 +10,8 @@ class Users(AbstractUser):
     photo = models.ImageField(upload_to='media/photo',default='media/image_defaut/img_profils.png')
     is_online = models.BooleanField(default=False)
   
+    def get_status(self):
+        return "En ligne " if self.is_online else "Hors ligne"
         
 class Messages(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

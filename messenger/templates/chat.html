@@ -51,11 +51,15 @@
 								<div class="d-flex bd-highlight">
 									<div class="img_cont">
 										<img src="{{ use.photo.url }}" class="rounded-circle user_img">
+										{% if use.get_status == "En ligne" %}
 										<span class="online_icon"></span>
+										{% else %}
+										<span class="offline_icon"></span>
+										{% endif %}
 									</div>
 									<div class="user_info">
 										<span>{{ use.username }}</span>
-										<p>{{ use.username }} is online</p>
+										<p>{{ use.get_status }}</p>
 									</div>
 								</div>
 							</li>
@@ -89,6 +93,7 @@
 								<li><i class="fas fa-users"></i> Add to close friends</li>
 								<li><i class="fas fa-plus"></i> Add to group</li>
 								<li><i class="fas fa-ban"></i> Block</li>
+								<li><a href="{% url 'deconnexion' %}" class="btn btn-primary">Déconnexion</a></li>
 							</ul>
 						</div>
 					</div>
