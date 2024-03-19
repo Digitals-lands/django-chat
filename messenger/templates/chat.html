@@ -58,7 +58,7 @@
 										<span class="online_icon offline"></span>
 										{% endif %}
 									</div>
-									<div class="user_info">
+									<div class="user_info" id="{{use.id}}">
 										<span>{{ use.username }}</span>
 										<p>{{ use.status_display }}</p>
 									</div>
@@ -99,9 +99,8 @@
 					</div>
 					<div class="card-body msg_card_body">
 						<div id="messages">
-							{% for message in messages %}
-							{{ message.sender }}: {{ message.text }} <br>
-							{% endfor %}
+						
+							
 						</div>
 					</div>
 					<div class="card-footer">
@@ -135,24 +134,46 @@
 </script>
 <script type="text/javascript">
 	let url = `ws://${window.location.host}/ws/socket-server/`
-
+var id='{{request.user.id}}'
+console.log(id)
 	const chatSocket = new WebSocket(url)
 	chatSocket.onmessage = function(e){
 		let data = JSON.parse(e.data)
-		console.log('Data:', data)
-
 		if(data.type === 'chat'){
 			let messages = document.getElementById('messages')
-			messages.insertAdjacentHTML('beforeend', `
-                    <div class="d-flex justify-content-end mb-4">
+			if (friends==data.sender_id ||id==data.sender_id)
+			{
+			if (data.sender_id==id)
+			{
+				messages.insertAdjacentHTML('beforeend', 
+				`<div class="d-flex justify-content-end mb-4">
                         <div class="msg_cotainer_send">
                             <strong>${data.message}</strong>
                         </div>
                         <div class="img_cont_msg">
-                            <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
+                            <img src="${data.sender_img}" class="rounded-circle user_img_msg">
                         </div>
                     </div>`
 			)
+			}
+			else 
+			{
+				messages.insertAdjacentHTML('beforeend', `
+				<div class="d-flex justify-content-start mb-4">
+					<div class="img_cont_msg">
+						<img src="${data.sender_img}" class="rounded-circle user_img_msg">
+					</div>
+					<div class="msg_cotainer">
+						<strong>${data.message}</strong>
+					</div>
+				</div>`
+		)
+			}
+			message.scrollTop = message.scrollHeight;
+		}
+		else{
+
+		}
 		}
 	}
 	let form = document.getElementById('form')
@@ -160,18 +181,19 @@
             e.preventDefault()
             let message = e.target.message.value
             chatSocket.send(JSON.stringify({
-                'message': message
+                'message': message,
+				'friends':friends
             }))
             form.reset()
         })
 
-</script>
 
-<script>
+		var friends=null
 	$(document).ready(function () {
 		$('#message-container').hide();
 
 		$('.user_info').click(function () {
+			friends = this.id;
 			const username = $(this).find('span').text();
 			const status = $(this).find('p').text();
 			const userImgSrc = $(this).siblings('.img_cont').find('img').clone();
