@@ -27,8 +27,11 @@ class MyConsumer(WebsocketConsumer):
         message = text_data_json['message']
         receiver_id =text_data_json['friends']
         receiver=Users.objects.get(id=receiver_id)
- 
-        
+        Messages.objects.create(
+               text=message,
+               sender=self.scope['user'],
+               destinate=receiver
+          )
         chaine1=self.scope['user'].username.lower()
         chaine2 =receiver.username.lower()
         if chaine1<chaine2:
