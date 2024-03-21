@@ -52,15 +52,13 @@
 								<div class="d-flex bd-highlight">
 									<div class="img_cont">
 										<img src="{{ use.photo.url }}" class="rounded-circle user_img">
-										{% if use.get_status %}
-										<span class="online_icon"></span>
-										{% else %}
-										<span class="online_icon offline"></span>
-										{% endif %}
+									
+										<span   class="online_icon offline online_icon_{{ use.id }}" ></span>
+									
 									</div>
 									<div class="user_info" id="{{use.id}}">
 										<span>{{ use.username }}</span>
-										<p>{{ use.status_display }}</p>
+										<p class="statu_{{use.id}}">Hors ligne</p>
 									</div>
 								</div>
 							</li>
@@ -74,7 +72,7 @@
 				<div class="card">
 					<div class="card-header msg_head">
 						<div class="d-flex bd-highlight">
-							<div class="img_cont">
+							<div class="img_cont" id="onli">
 								<img src="{{user.photo.url}}" class="rounded-circle user_img">
 								<span class="online_icon"></span>
 							</div>
@@ -99,8 +97,8 @@
 					</div>
 					<div class="card-body msg_card_body">
 						<div id="messages">
-						
-							
+
+
 						</div>
 					</div>
 					<div class="card-footer">
@@ -112,8 +110,7 @@
 								<input type="text" name="message" class="form-control type_msg"
 									placeholder="Tapez votre message">
 								<div class="input-group-append">
-									<span class="input-group-text send_btn"><i
-											class="fas fa-location-arrow"></i></span>
+									<span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
 								</div>
 							</div>
 						</form>
@@ -134,19 +131,57 @@
 </script>
 <script type="text/javascript">
 	let url = `ws://${window.location.host}/ws/socket-server/`
-var id='{{request.user.id}}'
-console.log(id)
+	let online_url = `ws://${window.location.host}/ws/online/`
+	var id = '{{request.user.id}}'
+	//console.log(id)
+
+	const onlineSocket = new WebSocket(online_url)
+	onlineSocket.onmessage = function(e) {
+		let data = JSON.parse(e.data);
+		if (data.type === 'online') {
+			const users = data.users;
+			users.forEach(user => {
+				const onlineIcon = document.getElementsByClassName(`online_icon_`+user.id);
+				const onlinestatus = document.getElementsByClassName(`statu_`+user.id);
+				if (onlinestatus.length > 0 ) {
+					for(let i=0; i<onlinestatus.length; i++) {
+				
+				if (onlinestatus[i]) {
+					if (user.is_online) {
+						onlinestatus[i].innerHTML='En ligne';
+						
+					} else {
+						onlinestatus[i].innerHTML='Hors ligne';
+					}
+				}
+			}
+		}
+				if (onlineIcon.length > 0 ) {
+					for(let i=0; i<onlineIcon.length; i++) {
+				
+				if (onlineIcon[i]) {
+					if (user.is_online) {
+						onlineIcon[i].classList.remove('offline');
+						
+					} else {
+						onlineIcon[i].classList.add('offline');
+					}
+				}
+			}
+		}
+			});
+		}
+	}
+
 	const chatSocket = new WebSocket(url)
-	chatSocket.onmessage = function(e){
+	chatSocket.onmessage = function (e) {
 		let data = JSON.parse(e.data)
-		if(data.type === 'chat'){
+		if (data.type === 'chat') {
 			let messages = document.getElementById('messages')
-			if (friends==data.sender_id ||id==data.sender_id)
-			{
-			if (data.sender_id==id)
-			{
-				messages.insertAdjacentHTML('beforeend', 
-				`<div class="d-flex justify-content-end mb-4">
+			if (friends == data.sender_id || id == data.sender_id) {
+				if (data.sender_id == id) {
+					messages.insertAdjacentHTML('beforeend',
+						`<div class="d-flex justify-content-end mb-4">
                         <div class="msg_cotainer_send">
                             <strong>${data.message}</strong>
 							<span class="msg_time_send">${data.created_at}</span>
@@ -155,11 +190,10 @@ console.log(id)
                             <img src="${data.sender_img}" class="rounded-circle user_img_msg">
                         </div>
                     </div>`
-			)
-			}
-			else 
-			{
-				messages.insertAdjacentHTML('beforeend', `
+					)
+				}
+				else {
+					messages.insertAdjacentHTML('beforeend', `
 				<div class="d-flex justify-content-start mb-4">
 					<div class="img_cont_msg">
 						<img src="${data.sender_img}" class="rounded-circle user_img_msg">
@@ -171,40 +205,41 @@ console.log(id)
 								
 					</div>
 				</div>`
-		)
+					)
+				}
+				message.scrollTop = message.scrollHeight;
 			}
-			message.scrollTop = message.scrollHeight;
-		}
-		else{
+			else {
 
-		}
+			}
 		}
 	}
 	let form = document.getElementById('form')
-        form.addEventListener('submit', (e) => {
-            e.preventDefault()
-            let message = e.target.message.value
-            chatSocket.send(JSON.stringify({
-                'message': message,
-				'friends':friends
-            }))
-            form.reset()
-        })
+	form.addEventListener('submit', (e) => {
+		e.preventDefault()
+		let message = e.target.message.value
+		chatSocket.send(JSON.stringify({
+			'message': message,
+			'friends': friends
+		}))
+		form.reset()
+	})
 
 
-		var friends=null
+	var friends = null
 	$(document).ready(function () {
 		$('#message-container').hide();
 
 		$('.user_info').click(function () {
 			friends = this.id;
 			const username = $(this).find('span').text();
-			const status = $(this).find('p').text();
+			const status = $(this).find('p').clone();
 			const userImgSrc = $(this).siblings('.img_cont').find('img').clone();
 			const onlineIcon = $(this).siblings('.img_cont').find('.online_icon').clone();
+			
 
 			$('#message-container .user_info span').text(username);
-			$('#message-container .user_info p').text(status);
+			$('#message-container .user_info p').append(status);
 			$('#message-container .img_cont').empty().append(userImgSrc);
 			$('#message-container .img_cont').append(onlineIcon);
 

@@ -3,7 +3,7 @@ from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .models import  Users
 
-class online(WebsocketConsumer):
+class Online(WebsocketConsumer):
     
     # Dictionnaire pour stocker les utilisateurs en ligne
     online_users = {}  
@@ -61,9 +61,9 @@ class online(WebsocketConsumer):
         
         for user in all_users:
             if user.id in self.online_users: 
-                user_info.append({'username': user.username, 'adresse':user.adresse, 'id': str(user.id), 'online': True})
+                user_info.append({'username': user.username, 'id': str(user.id), 'is_online': True})
             else:
-                user_info.append({'username': user.username, 'adresse':user.adresse,'id': str(user.id), 'online': False})
+                user_info.append({'username': user.username,'id': str(user.id), 'is_online': False})
       
         self.send(text_data=json.dumps({
             'type':'online',
