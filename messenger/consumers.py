@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+from datetime import datetime, timedelta
 from messenger.models import *
 
 class MyConsumer(WebsocketConsumer):
@@ -27,7 +28,7 @@ class MyConsumer(WebsocketConsumer):
         message = text_data_json['message']
         receiver_id =text_data_json['friends']
         receiver=Users.objects.get(id=receiver_id)
-        Messages.objects.create(
+        messag=Messages.objects.create(
                text=message,
                sender=self.scope['user'],
                destinate=receiver
@@ -46,13 +47,23 @@ class MyConsumer(WebsocketConsumer):
                 'message': message,
                 'sender_id':str(self.scope['user'].id),
                 'receiver_id':receiver_id,
+                'created_at': format_date(messag.created_at),
                 'sender_img':str(self.scope['user'].photo.url)
             }
         )
-        
+        def format_date(created_at):
+            today = datetime.now()
+            yesterday = today - timedelta(days=1)
+            if created_at.date() == today.date():
+                return "aujourd'hui à " + created_at.strftime("%H:%M")
+            elif created_at.date() == yesterday.date():
+                return "hier à " + created_at.strftime("%H:%M")
+            else:
+                return created_at.strftime("%d %B à %Hh%M")
+
     def chat_message(self, event):
         message = event['message']
-        
+        created_at=event["created_at"]
         sender_id = event['sender_id']
         receiver_id = event['receiver_id']
         sender_img= event['sender_img']
@@ -62,4 +73,5 @@ class MyConsumer(WebsocketConsumer):
             'sender_id':sender_id,
             'receiver_id':receiver_id,
             'sender_img':sender_img,
+            'created_at':created_at,
         }))

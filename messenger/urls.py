@@ -8,7 +8,7 @@ urlpatterns = [
     path('chat', chat_message, name='chat'),
     path('login', login_user, name='login'),
     path('deconnexion', deconnexion, name='deconnexion'),
-    path('send-message', send_message, name='send_message'),
+    path('messages/<str:id>',chat_messages,name='messages/'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

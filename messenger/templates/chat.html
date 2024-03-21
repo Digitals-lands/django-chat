@@ -149,6 +149,7 @@ console.log(id)
 				`<div class="d-flex justify-content-end mb-4">
                         <div class="msg_cotainer_send">
                             <strong>${data.message}</strong>
+							<span class="msg_time_send">${data.created_at}</span>
                         </div>
                         <div class="img_cont_msg">
                             <img src="${data.sender_img}" class="rounded-circle user_img_msg">
@@ -162,9 +163,12 @@ console.log(id)
 				<div class="d-flex justify-content-start mb-4">
 					<div class="img_cont_msg">
 						<img src="${data.sender_img}" class="rounded-circle user_img_msg">
+						
 					</div>
 					<div class="msg_cotainer">
 						<strong>${data.message}</strong>
+						<span class="msg_time_send">${data.created_at}</span>
+								
 					</div>
 				</div>`
 		)
@@ -205,6 +209,50 @@ console.log(id)
 			$('#message-container .img_cont').append(onlineIcon);
 
 			$('#message-container').show();
+			
+			let messages = document.getElementById('messages')
+			messages.innerHtml=''
+			fetch('/messages/' + friends)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					return response.json(); // Parse the response as JSON
+				})
+				.then(data => {
+
+					let response = data
+					for (let i = 0; i < response.messages.length; i++) {
+
+						//afficher si le  message  m'appartient
+						if (response.messages[i].sender == id) {
+							messages.insertAdjacentHTML('beforeend', 
+							`<div class="d-flex justify-content-end mb-4">
+									<div class="msg_cotainer_send">
+										<strong>${response.messages[i].text}</strong>
+
+									<span class="msg_time_send">${response.messages[i].created_at}</span>
+									</div>
+									<div class="img_cont_msg">
+										<img src="${response.messages[i].photo}" class="rounded-circle user_img_msg">
+									</div>
+								</div>`)
+						}else{
+
+							messages.insertAdjacentHTML('beforeend', `
+							<div class="d-flex justify-content-start mb-4">
+								<div class="img_cont_msg">
+									<img src="${response.messages[i].photo}" class="rounded-circle user_img_msg">
+								</div>
+								<div class="msg_cotainer">
+									<strong>${response.messages[i].text}</strong>
+
+									<span class="msg_time_send">${response.messages[i].created_at}</span>
+								</div>
+							</div>`)
+						}
+					}
+				})
 		});
 	});
 </script>
