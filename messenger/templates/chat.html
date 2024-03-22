@@ -230,7 +230,9 @@
 	$(document).ready(function () {
 		$('#message-container').hide();
 
+
 		$('.user_info').click(function () {
+			$('#message-container').innerHTML=""
 			friends = this.id;
 			const username = $(this).find('span').text();
 			const status = $(this).find('p').clone();
@@ -239,7 +241,7 @@
 			
 
 			$('#message-container .user_info span').text(username);
-			$('#message-container .user_info p').append(status);
+			$('#message-container .user_info p').empty().append(status);
 			$('#message-container .img_cont').empty().append(userImgSrc);
 			$('#message-container .img_cont').append(onlineIcon);
 

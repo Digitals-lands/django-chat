@@ -13,7 +13,7 @@ class Users(AbstractUser):
 class Messages(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     text = models.TextField(null = True)
-    file = models.FileField(upload_to = 'media/document', null = True)
+    file = models.FileField(upload_to = 'media/document', null = True,default=None)
     sender = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='sender')
     destinate = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='destinate', null=True)
     confirmation_lecture = models.BooleanField(default=False)
